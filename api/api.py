@@ -1,7 +1,7 @@
-from fastapi import FastAPI, UploadFile, Header, Depends
+from fastapi import FastAPI, UploadFile, Header, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from typing import List, Dict, Annotated
+from typing import List, Dict, Annotated, Optional
 import duckdb
 from datetime import datetime
 import json
@@ -91,13 +91,22 @@ async def get_current_user(
     return UserMetadata(**user_meta_data)
 
 
+@app.get("/err_test")
+async def get_401(user=Depends(get_current_user)):
+    validate_access(user, ["mystery.user"])
+
+
 @app.get("/hello")
 async def get_hello(user=Depends(get_current_user)) -> JSONResponse:
     """
     Use FastAPIs dependency injection system to get the current user.
     """
-    if user is None:
-        return {"message": "Howdy stranger!"}
-    return {
-        "message": f"So nice to see you, {user.user}, you are part of {','.join(user.groups)}!"
-    }
+    validate_access(user, data_team)
+    return {"message": f"So nice to see you, {user.user}!"}
+
+
+def validate_access(user: Optional[str], control_list: List) -> None:
+    if user is None or user.user not in control_list:
+        raise HTTPException(
+            status_code=401, detail="You are not authorized to access this endpoint"
+        )
