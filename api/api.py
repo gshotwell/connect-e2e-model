@@ -16,6 +16,8 @@ con.execute(
 )
 con.close()
 
+data_team = ["gordon.shotwell"]
+
 
 class TrainingData(BaseModel):
     text: str
@@ -96,4 +98,4 @@ async def get_hello(user=Depends(get_current_user)) -> JSONResponse:
     """
     if user is None:
         return {"message": "Howdy stranger!"}
-    return {"message": f"So nice to see you, {user.user}!"}
+    return {"message": f"So nice to see you, {user.user}, you are part of {",".join(user.groups)}!"}
