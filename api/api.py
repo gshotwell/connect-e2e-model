@@ -1,6 +1,7 @@
-from fastapi import FastAPI, UploadFile
-from pydantic import BaseModel
-from typing import List, Dict
+from fastapi import FastAPI, UploadFile, Header, Depends
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+from typing import List, Dict, Annotated
 import duckdb
 from datetime import datetime
 import json
@@ -68,3 +69,31 @@ async def query_data(qry: str) -> List[TrainingData]:
     return [
         TrainingData(text=row[0], annotator=row[1], annotation=row[2]) for row in result
     ]
+
+
+class UserMetadata(BaseModel):
+    user: str
+    groups: list[str] = Field(list)
+
+
+async def get_current_user(
+    rstudio_connect_credentials: Annotated[str | None, Header()] = None
+) -> UserMetadata | None:
+    """
+    Get the user metadata from the RStudio-Connect-Credentials header and then
+    parse the data into a UserMetadata object.
+    """
+    if rstudio_connect_credentials is None:
+        return None
+    user_meta_data = json.loads(rstudio_connect_credentials)
+    return UserMetadata(**user_meta_data)
+
+
+@app.get("/hello")
+async def get_hello(user=Depends(get_current_user)) -> JSONResponse:
+    """
+    Use FastAPIs dependency injection system to get the current user.
+    """
+    if user is None:
+        return {"message": "Howdy stranger!"}
+    return {"message": f"So nice to see you, {user.user}!"}

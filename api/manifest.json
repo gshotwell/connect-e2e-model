@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "locale": "en_US.UTF-8",
+  "metadata": {
+    "appmode": "python-fastapi",
+    "entrypoint": "api"
+  },
+  "python": {
+    "version": "3.10.9",
+    "package_manager": {
+      "name": "pip",
+      "version": "22.3.1",
+      "package_file": "requirements.txt"
+    }
+  },
+  "files": {
+    "requirements.txt": {
+      "checksum": "fc3194821dd750ffe01ad813f4e55e9a"
+    },
+    "api.py": {
+      "checksum": "0e25a8283efe518d930344ee3a2d262b"
+    }
+  }
+}
