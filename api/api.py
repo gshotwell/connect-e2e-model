@@ -31,48 +31,6 @@ class ModelMetadata(BaseModel):
     model_author: str
 
 
-@app.post("/append_training_data")
-async def append_training_data(data: List[TrainingData]) -> Dict:
-    con = duckdb.connect(db_path)
-
-    for item in data:
-        query = f"INSERT INTO training_data (text, annotator, annotation) VALUES ('{item.text}', '{item.annotator}', {item.annotation})"
-        con.execute(query)
-    con.close()
-
-    return {"number_of_added_entries": len(data)}
-
-
-@app.get("/score_model")
-async def score_model(text: str) -> int:
-    pass
-
-
-@app.put("/update_model")
-async def update_model(model_file: UploadFile, metadata: ModelMetadata) -> None:
-    with open("model.bin", "wb") as f:
-        f.write(await model_file.read())
-
-    with open("model-metadata.json", "w") as f:
-        json.dump(metadata.model_dump(), f)
-
-
-@app.get("/model_metadata")
-async def model_metadata() -> dict:
-    with open("model-metadata.json", "r") as f:
-        return json.load(f)
-
-
-@app.get("/query_data")
-async def query_data(qry: str) -> List[TrainingData]:
-    con = duckdb.connect(db_path, read_only=True)
-    result = con.execute(qry).fetchall()
-    con.close()
-    return [
-        TrainingData(text=row[0], annotator=row[1], annotation=row[2]) for row in result
-    ]
-
-
 class UserMetadata(BaseModel):
     user: str
     groups: list[str] = Field(list)
@@ -91,18 +49,55 @@ async def get_current_user(
     return UserMetadata(**user_meta_data)
 
 
-@app.get("/err_test")
-async def get_401(user=Depends(get_current_user)):
-    validate_access(user, ["mystery.user"])
-
-
-@app.get("/hello")
-async def get_hello(user=Depends(get_current_user)) -> JSONResponse:
-    """
-    Use FastAPIs dependency injection system to get the current user.
-    """
+@app.post("/append_training_data")
+async def append_training_data(
+    data: List[TrainingData], user=Depends(get_current_user)
+) -> Dict:
     validate_access(user, data_team)
-    return {"message": f"So nice to see you, {user.user}!"}
+    con = duckdb.connect(db_path)
+
+    for item in data:
+        query = f"INSERT INTO training_data (text, annotator, annotation) VALUES ('{item.text}', '{item.annotator}', {item.annotation})"
+        con.execute(query)
+    con.close()
+
+    return {"number_of_added_entries": len(data)}
+
+
+@app.get("/score_model")
+async def score_model(text: str) -> int:
+    pass
+
+
+@app.put("/update_model")
+async def update_model(
+    model_file: UploadFile,
+    metadata: ModelMetadata,
+    user=Depends(get_current_user),
+) -> None:
+    validate_access(user, data_team)
+    with open("model.bin", "wb") as f:
+        f.write(await model_file.read())
+
+    with open("model-metadata.json", "w") as f:
+        json.dump(metadata.model_dump(), f)
+
+
+@app.get("/model_metadata")
+async def model_metadata() -> dict:
+    with open("model-metadata.json", "r") as f:
+        return json.load(f)
+
+
+@app.get("/query_data")
+async def query_data(qry: str, user=Depends(get_current_user)) -> List[TrainingData]:
+    validate_access(user, data_team)
+    con = duckdb.connect(db_path, read_only=True)
+    result = con.execute(qry).fetchall()
+    con.close()
+    return [
+        TrainingData(text=row[0], annotator=row[1], annotation=row[2]) for row in result
+    ]
 
 
 def validate_access(user: Optional[str], control_list: List) -> None:
