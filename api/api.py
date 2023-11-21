@@ -100,6 +100,11 @@ async def query_data(qry: str, user=Depends(get_current_user)) -> List[TrainingD
     ]
 
 
+@app.get("/api_test")
+async def api_test(qry: str) -> str:
+    return qry
+
+
 def validate_access(user: Optional[str], control_list: List) -> None:
     if user is None or user.user not in control_list:
         raise HTTPException(
