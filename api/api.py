@@ -5,6 +5,7 @@ from typing import List, Dict, Annotated, Optional
 import duckdb
 from datetime import datetime
 import json
+import uuid
 
 app = FastAPI()
 
@@ -12,7 +13,15 @@ db_path = "training_data.db"
 
 con = duckdb.connect(db_path)
 con.execute(
-    "CREATE TABLE IF NOT EXISTS training_data (text VARCHAR, annotator VARCHAR, annotation BOOLEAN)"
+    """
+    CREATE TABLE IF NOT EXISTS training_data (
+        id VARCHAR, 
+        date TIMESTAMP,
+        text VARCHAR, 
+        annotator VARCHAR, 
+        annotation BOOLEAN, 
+    )
+    """
 )
 con.close()
 
@@ -57,7 +66,12 @@ async def append_training_data(
     con = duckdb.connect(db_path)
 
     for item in data:
-        query = f"INSERT INTO training_data (text, annotator, annotation) VALUES ('{item.text}', '{item.annotator}', {item.annotation})"
+        id = uuid.uuid4
+        date = datetime.now()
+        query = (
+            "INSERT INTO training_data (id, date, text, annotator, annotation) "
+            f"VALUES ('{id}', '{date}', '{item.text}', '{item.annotator}', {item.annotation})"
+        )
         con.execute(query)
     con.close()
 
@@ -106,7 +120,9 @@ async def api_test(qry: str) -> str:
 
 
 def validate_access(user: Optional[str], control_list: List) -> None:
-    if user is None or user.user not in control_list:
+    if user is None:
+        return
+    if user.user not in control_list:
         raise HTTPException(
             status_code=401, detail="You are not authorized to access this endpoint"
         )
