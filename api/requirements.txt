@@ -1,4 +1,4 @@
 fastapi
-duckdb
+pandas
 uvicorn
 python-multipart

@@ -2,28 +2,30 @@ from fastapi import FastAPI, UploadFile, Header, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import List, Dict, Annotated, Optional
-import duckdb
+import pandas as pd
 from datetime import datetime
 import json
 import uuid
+import sqlite3
+import os
+from pathlib import Path
+
+parent = Path(__file__).parent
+db_path = parent / "training_db.sqlite"
+
+
+async def load_data():
+    global db_path
+    if not os.path.exists(db_path):
+        conn = sqlite3.connect(db_path)
+        df = pd.read_parquet(parent / "electronics.parquet")
+        df.to_sql("training_data", conn, if_exists="replace", index=False)
+        conn.close()
+
 
 app = FastAPI()
 
-db_path = "training_data.db"
-
-con = duckdb.connect(db_path)
-con.execute(
-    """
-    CREATE TABLE IF NOT EXISTS training_data (
-        id VARCHAR, 
-        date TIMESTAMP,
-        text VARCHAR, 
-        annotator VARCHAR, 
-        annotation BOOLEAN, 
-    )
-    """
-)
-con.close()
+app.add_event_handler("startup", load_data)
 
 data_team = ["gordon.shotwell"]
 
@@ -63,17 +65,11 @@ async def append_training_data(
     data: List[TrainingData], user=Depends(get_current_user)
 ) -> Dict:
     validate_access(user, data_team)
-    con = duckdb.connect(db_path)
 
-    for item in data:
-        id = uuid.uuid4
-        date = datetime.now()
-        query = (
-            "INSERT INTO training_data (id, date, text, annotator, annotation) "
-            f"VALUES ('{id}', '{date}', '{item.text}', '{item.annotator}', {item.annotation})"
-        )
-        con.execute(query)
-    con.close()
+    df = pd.DataFrame([item.dict() for item in data])
+    df["id"] = [str(uuid.uuid4()) for _ in range(len(df))]
+    df["date"] = pd.Timestamp.now()
+    df.to_parquet("electronics.parquet", mode="append")
 
     return {"number_of_added_entries": len(data)}
 
@@ -104,14 +100,17 @@ async def model_metadata() -> dict:
 
 
 @app.get("/query_data")
-async def query_data(qry: str, user=Depends(get_current_user)) -> List[TrainingData]:
+async def query_data(qry: str, user=Depends(get_current_user)) -> List[Dict]:
     validate_access(user, data_team)
-    con = duckdb.connect(db_path, read_only=True)
-    result = con.execute(qry).fetchall()
+    global db_path
+    con = sqlite3.connect(db_path)
+    cur = con.cursor()
+    cur.execute(qry)
+    result = cur.fetchall()
+    column_names = [description[0] for description in cur.description]
+    result = pd.DataFrame(result, columns=column_names)
     con.close()
-    return [
-        TrainingData(text=row[0], annotator=row[1], annotation=row[2]) for row in result
-    ]
+    return result.to_dict("records")
 
 
 @app.get("/api_test")
