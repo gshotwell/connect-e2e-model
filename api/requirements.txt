@@ -3,5 +3,5 @@ pandas
 uvicorn
 python-multipart
 pyarrow
-xgboost
 scikit-learn
+xgboost
