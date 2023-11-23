@@ -2,9 +2,7 @@
 from model_api import APIWrapper
 
 api = APIWrapper()
-api.last_updated()
 ```
-
 
 ```{python}
 training_data = api.query_data("select * from training_data")
@@ -43,12 +41,4 @@ print("AUC: ", roc_auc_score(y_test, y_pred_proba))
 
 ```{python}
 api.upload_model(model, vectorizer)
-```
-
-
-```{python}
-txt = training_data["text"][0]
-score = api.score_model(txt)
-print(txt)
-print(score)
 ```

@@ -1,9 +1,7 @@
 from fastapi import FastAPI, UploadFile, Header, Depends, HTTPException
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import List, Dict, Annotated, Optional
 import pandas as pd
-from datetime import datetime
 import json
 import uuid
 import sqlite3
@@ -12,8 +10,6 @@ from pathlib import Path
 from xgboost import XGBClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 import pickle
-
-from numpy import ndarray
 
 parent = Path(__file__).parent
 db_path = parent / "training_db.sqlite"

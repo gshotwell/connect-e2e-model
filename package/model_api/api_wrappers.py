@@ -25,10 +25,13 @@ class APIWrapper:
             return resp.content.decode()
         return resp
 
-    def test(self) -> str:
-        return self.get("api_test", params={"qry": "Test sucessful!"})
-
     def upload_data(self, df: pd.DataFrame) -> None:
+        """
+        Uploads data to the API.
+
+        :param df: A DataFrame containing the data to be uploaded. Must contain 'text', 'annotator', and 'annotation' columns.
+        :return: None
+        """
         if not set(["text", "annotator", "annotation"]).issubset(df.columns):
             raise ValueError(
                 "DataFrame must contain 'text', 'annotator', and 'annotation' columns."
@@ -37,10 +40,23 @@ class APIWrapper:
         return self.post("append_training_data", json=data)
 
     def query_data(self, qry: str) -> pd.DataFrame:
+        """
+        Queries data from the API.
+
+        :param qry: A SQL query string.
+        :return: A DataFrame containing the queried data.
+        """
         json_response = self.get("query_data", params={"qry": qry})
         return pd.DataFrame(json.loads(json_response))
 
     def upload_model(self, model: XGBClassifier, vectorizer: CountVectorizer) -> str:
+        """
+        Uploads a model and a vectorizer to the API.
+
+        :param model: An XGBClassifier model.
+        :param vectorizer: A CountVectorizer.
+        :return: The response from the API.
+        """
         import pickle
 
         with open("model.pkl", "wb") as f:
@@ -54,7 +70,18 @@ class APIWrapper:
         return self.post("update_model", files=files)
 
     def score_model(self, text: str) -> float:
+        """
+        Scores a model using the API.
+
+        :param text: A string of text to be scored.
+        :return: A number representing the probability that the text string is about electronics.
+        """
         return self.get("score_model", params={"text": text})
 
     def last_updated(self) -> str:
+        """
+        Gets the last updated time from the API.
+
+        :return: The last updated time as a string.
+        """
         return self.get("last_updated")
