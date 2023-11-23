@@ -1,6 +1,3 @@
-os.getenv('CONNECT_API_KEY')}
-
-
 import requests
 import pandas as pd
 import json
@@ -11,7 +8,7 @@ import os
 
 class APIWrapper:
     def __init__(self):
-        self.url = "http://127.0.0.1:8000/"
+        self.url = "https://colorado.posit.co/rsc/electronics-classifier/"
         self.headers = {"Authorization": f"Key {os.getenv('CONNECT_API_KEY')}"}
 
     def post(self, endpoint: str, **kwargs) -> requests.Response:
