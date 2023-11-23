@@ -82,15 +82,11 @@ async def score_model(text: str) -> int:
 @app.put("/update_model")
 async def update_model(
     model_file: UploadFile,
-    metadata: ModelMetadata,
     user=Depends(get_current_user),
 ) -> None:
     validate_access(user, data_team)
     with open("model.bin", "wb") as f:
         f.write(await model_file.read())
-
-    with open("model-metadata.json", "w") as f:
-        json.dump(metadata.model_dump(), f)
 
 
 @app.get("/model_metadata")
