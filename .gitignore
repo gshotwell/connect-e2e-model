@@ -160,3 +160,7 @@ cython_debug/
 #.idea/
 
 api/training_data.db
+
+.DS_Store
+
+electronics.db

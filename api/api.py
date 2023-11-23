@@ -9,6 +9,11 @@ import uuid
 import sqlite3
 import os
 from pathlib import Path
+from xgboost import XGBClassifier
+from sklearn.feature_extraction.text import CountVectorizer
+import pickle
+
+from numpy import ndarray
 
 parent = Path(__file__).parent
 db_path = parent / "training_db.sqlite"
@@ -34,12 +39,6 @@ class TrainingData(BaseModel):
     text: str
     annotator: str
     annotation: bool
-
-
-class ModelMetadata(BaseModel):
-    date: datetime
-    model_name: str
-    model_author: str
 
 
 class UserMetadata(BaseModel):
@@ -75,24 +74,38 @@ async def append_training_data(
 
 
 @app.get("/score_model")
-async def score_model(text: str) -> int:
-    pass
+async def score_model(text: str) -> float:
+    with open("model.bin", "rb") as f:
+        model: XGBClassifier = pickle.load(f)
+    with open("vectorizer.bin", "rb") as f:
+        vectorizer: CountVectorizer = pickle.load(f)
+    text_vector = vectorizer.transform([text])
+    score = model.predict_proba(text_vector)
+    return score[0][1]
 
 
-@app.put("/update_model")
+@app.post("/update_model")
 async def update_model(
-    model_file: UploadFile,
+    ml_model: UploadFile,
+    vectorizer: UploadFile,
     user=Depends(get_current_user),
 ) -> None:
     validate_access(user, data_team)
     with open("model.bin", "wb") as f:
-        f.write(await model_file.read())
+        f.write(await ml_model.read())
+
+    with open("vectorizer.bin", "wb") as f:
+        f.write(await vectorizer.read())
+
+    with open("last_updated.txt", "w") as f:
+        f.write(str(pd.Timestamp.now()))
 
 
-@app.get("/model_metadata")
-async def model_metadata() -> dict:
-    with open("model-metadata.json", "r") as f:
-        return json.load(f)
+@app.get("/last_updated")
+async def model_metadata() -> str:
+    with open("last_updated.txt", "r") as f:
+        last_updated = f.read()
+    return last_updated
 
 
 @app.get("/query_data")
