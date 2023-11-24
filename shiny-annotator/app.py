@@ -12,7 +12,7 @@ app_ui = ui.page_fluid(
                 ui.div(
                     ui.input_text_area(
                         "text",
-                        "Enter Text",
+                        label="",
                         height="600px",
                         width="100%",
                         placeholder="Enter text to annotate",
