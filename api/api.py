@@ -79,7 +79,10 @@ async def append_training_data(
     df = pd.DataFrame([item.dict() for item in data])
     df["id"] = [str(uuid.uuid4()) for _ in range(len(df))]
     df["date"] = pd.Timestamp.now()
-    df.to_parquet("electronics.parquet", mode="append")
+    # Create a connection to the SQLite database
+    conn = sqlite3.connect(db_path)
+    df.to_sql("training_data", conn, if_exists="append", index=False)
+    conn.close()
 
     return {"number_of_added_entries": len(data)}
 
