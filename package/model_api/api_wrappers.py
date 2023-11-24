@@ -7,20 +7,30 @@ import os
 
 
 class APIWrapper:
-    def __init__(self):
+    def __init__(self, api_key: str = os.getenv("CONNECT_API_KEY")):
         self.url = "https://colorado.posit.co/rsc/electronics-classifier/"
-        self.headers = {"Authorization": f"Key {os.getenv('CONNECT_API_KEY')}"}
+        self.headers = {"Authorization": f"Key {api_key}"}
 
-    def post(self, endpoint: str, **kwargs) -> requests.Response:
-        resp = requests.post(self.url + endpoint, headers=self.headers, **kwargs)
+    def handle_response(self, resp: requests.Response) -> None:
+        """
+        Handles the response from the API.
+
+        :param resp: The response from the API.
+        :return: None
+        """
         if resp.status_code == 401:
             raise Exception("You don't have access to this endpoint")
+        elif resp.status_code != 200:
+            raise Exception(f"Unexpected status code: {resp.status_code}")
+
+    def post(self, endpoint: str, **kwargs) -> str:
+        resp = requests.post(self.url + endpoint, headers=self.headers, **kwargs)
+        self.handle_response(resp)
         return resp
 
-    def get(self, endpoint: str, **kwargs) -> requests.Response:
+    def get(self, endpoint: str, **kwargs) -> str:
         resp = requests.get(self.url + endpoint, headers=self.headers, **kwargs)
-        if resp.status_code == 401:
-            raise Exception("You don't have access to this endpoint")
+        self.handle_response(resp)
         if resp.status_code == 200:
             return resp.content.decode()
         return resp
@@ -59,15 +69,17 @@ class APIWrapper:
         """
         import pickle
 
-        with open("model.pkl", "wb") as f:
-            pickle.dump(model, f)
-        with open("vectorizer.pkl", "wb") as f:
-            pickle.dump(vectorizer, f)
-        files = {
-            "ml_model": open("model.pkl", "rb"),
-            "vectorizer": open("vectorizer.pkl", "rb"),
-        }
-        return self.post("update_model", files=files)
+        with open("model.pkl", "wb") as f_model, open(
+            "vectorizer.pkl", "wb"
+        ) as f_vectorizer:
+            pickle.dump(model, f_model)
+            pickle.dump(vectorizer, f_vectorizer)
+
+        with open("model.pkl", "rb") as f_model, open(
+            "vectorizer.pkl", "rb"
+        ) as f_vectorizer:
+            files = {"ml_model": f_model, "vectorizer": f_vectorizer}
+            return self.post("update_model", files=files)
 
     def score_model(self, text: str) -> float:
         """

@@ -16,6 +16,10 @@ db_path = parent / "training_db.sqlite"
 
 
 async def load_data():
+    """
+    Load data from the 'electronics.parquet' file into a SQLite database.
+    If the database does not exist, it is created.
+    """
     global db_path
     if not os.path.exists(db_path):
         conn = sqlite3.connect(db_path)
@@ -32,12 +36,20 @@ data_team = ["gordon.shotwell"]
 
 
 class TrainingData(BaseModel):
+    """
+    A Pydantic model for training data.
+    """
+
     text: str
     annotator: str
     annotation: bool
 
 
 class UserMetadata(BaseModel):
+    """
+    A Pydantic model for user metadata.
+    """
+
     user: str
     groups: list[str] = Field(list)
 
@@ -59,6 +71,9 @@ async def get_current_user(
 async def append_training_data(
     data: List[TrainingData], user=Depends(get_current_user)
 ) -> Dict:
+    """
+    Append training data to the 'electronics.parquet' file.
+    """
     validate_access(user, data_team)
 
     df = pd.DataFrame([item.dict() for item in data])
@@ -71,6 +86,9 @@ async def append_training_data(
 
 @app.get("/score_model")
 async def score_model(text: str) -> float:
+    """
+    Score a text using the model.
+    """
     with open("model.bin", "rb") as f:
         model: XGBClassifier = pickle.load(f)
     with open("vectorizer.bin", "rb") as f:
@@ -86,6 +104,9 @@ async def update_model(
     vectorizer: UploadFile,
     user=Depends(get_current_user),
 ) -> None:
+    """
+    Update the model and vectorizer.
+    """
     validate_access(user, data_team)
     with open("model.bin", "wb") as f:
         f.write(await ml_model.read())
@@ -99,6 +120,9 @@ async def update_model(
 
 @app.get("/last_updated")
 async def model_metadata() -> str:
+    """
+    Get the last updated time of the model.
+    """
     with open("last_updated.txt", "r") as f:
         last_updated = f.read()
     return last_updated
@@ -106,6 +130,9 @@ async def model_metadata() -> str:
 
 @app.get("/query_data")
 async def query_data(qry: str, user=Depends(get_current_user)) -> List[Dict]:
+    """
+    Query data from the SQLite database.
+    """
     validate_access(user, data_team)
     global db_path
     con = sqlite3.connect(db_path)
@@ -120,10 +147,17 @@ async def query_data(qry: str, user=Depends(get_current_user)) -> List[Dict]:
 
 @app.get("/api_test")
 async def api_test(qry: str) -> str:
+    """
+    A test endpoint that returns the input query string.
+    """
     return qry
 
 
 def validate_access(user: Optional[str], control_list: List) -> None:
+    """
+    Validate the access of a user.
+    If the user is not in the control list, an HTTPException is raised.
+    """
     if user is None:
         return
     if user.user not in control_list:
