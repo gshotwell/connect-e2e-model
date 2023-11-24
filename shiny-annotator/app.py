@@ -21,12 +21,20 @@ app_ui = ui.page_fluid(
                 ),
                 ui.layout_column_wrap(
                     ui.input_action_button(
-                        "is_electronics", "Electonics", class_="btn btn-primary"
+                        "is_electronics",
+                        "Electonics",
+                        class_="btn btn-primary",
                     ),
                     ui.input_action_button(
-                        "not_electronics", "Not Electronics", class_="btn btn-warning"
+                        "not_electronics",
+                        "Not Electronics",
+                        class_="btn btn-warning",
                     ),
-                    ui.input_action_button("skip", "Skip", class_="btn btn-success"),
+                    ui.input_action_button(
+                        "skip",
+                        "Skip",
+                        class_="btn btn-success",
+                    ),
                     width=1 / 3,
                 ),
             ),
