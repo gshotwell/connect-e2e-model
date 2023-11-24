@@ -14,5 +14,5 @@ setup(
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     packages=find_packages(),
-    install_requires=["requests", "xgboost", "sklearn"],
+    install_requires=["requests", "xgboost", "scikit-learn"],
 )
