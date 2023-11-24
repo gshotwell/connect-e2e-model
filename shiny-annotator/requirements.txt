@@ -1,3 +1,4 @@
 shiny 
 model_api @ git+https://github.com/gshotwell/connect-e2e-model.git@main#subdirectory=package
 pandas
+requests
