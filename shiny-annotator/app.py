@@ -9,15 +9,12 @@ app_ui = ui.page_fluid(
         ui.row(
             ui.column(
                 9,
-                ui.div(
-                    ui.input_text_area(
-                        "text",
-                        label="",
-                        height="600px",
-                        width="100%",
-                        placeholder="Enter text to annotate",
-                    ),
-                    style='{"color "red"}',
+                ui.input_text_area(
+                    "text",
+                    label="",
+                    height="600px",
+                    width="100%",
+                    placeholder="Enter text to annotate",
                 ),
                 ui.layout_column_wrap(
                     ui.input_action_button(
