@@ -2,7 +2,7 @@
 
 This is a demo repository showing an end-to-end model management workflow with Posit Connect. 
 
-![]("diagram.png")
+![](diagram.png)
 
 There are four main parts to this system. 
 
