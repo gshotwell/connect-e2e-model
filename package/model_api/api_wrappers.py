@@ -69,6 +69,11 @@ class APIWrapper:
         """
         import pickle
 
+        if not isinstance(model, XGBClassifier):
+            raise TypeError("Model must be an instance of XGBClassifier.")
+        if not isinstance(vectorizer, CountVectorizer):
+            raise TypeError("Vectorizer must be an instance of CountVectorizer.")
+
         with open("model.pkl", "wb") as f_model, open(
             "vectorizer.pkl", "wb"
         ) as f_vectorizer:

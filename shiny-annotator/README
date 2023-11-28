@@ -1,0 +1,11 @@
+# Shiny Annotator
+
+This is a web application that allows users to quickly annotate training data. It uses the API endpoints to retrieve, score, and update text.
+
+## Running the Shiny Annotator
+
+To run the Shiny Annotator, follow these steps:
+
+1. Navigate to the `shiny-annotator` directory.
+2. Install the required dependencies with `pip install -r requirements.txt`.
+3. Run the application with `shiny run app.py`.

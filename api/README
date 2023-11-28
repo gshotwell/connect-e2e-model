@@ -1,0 +1,22 @@
+# Model API
+
+This is a FastAPI application that manages the model deployment and scoring.
+
+## Running the API
+
+To run the API, follow these steps:
+
+1. Navigate to the `api` directory.
+2. Install the required dependencies with `pip install -r requirements.txt`.
+3. Run the application with `uvicorn main:app --reload`.
+
+The API will be served at `http://localhost:8000`.
+
+## Endpoints
+
+The API has several endpoints for model management:
+
+- `/score_model`: This endpoint accepts a text string and returns a score from the model.
+- `/upload_model`: This endpoint accepts a model and a vectorizer for upload.
+
+Please refer to the API documentation at `http://localhost:8000/docs` for more details.
