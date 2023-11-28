@@ -149,11 +149,11 @@ async def query_data(qry: str, user=Depends(get_current_user)) -> List[Dict]:
 
 
 @app.get("/api_test")
-async def api_test(qry: str) -> str:
+async def api_test(qry: str, user=Depends(get_current_user)) -> str:
     """
     A test endpoint that returns the input query string.
     """
-    return qry
+    return user.user
 
 
 def validate_access(user: Optional[str], control_list: List) -> None:
