@@ -15,10 +15,19 @@
   },
   "files": {
     "requirements.txt": {
-      "checksum": "fc3194821dd750ffe01ad813f4e55e9a"
+      "checksum": "a85a7e4c5227403eec4192d724c6ea71"
     },
     "api.py": {
-      "checksum": "0e25a8283efe518d930344ee3a2d262b"
+      "checksum": "3af3a1b773b455420f1cefd8d6b78034"
+    },
+    "electronics.parquet": {
+      "checksum": "637b569a9c454a7be968215e4b4c1fb7"
+    },
+    "model.bin": {
+      "checksum": "c63eaf1f43e2b0e61b8f7a282c341688"
+    },
+    "vectorizer.bin": {
+      "checksum": "e4fa90572b6913cfe0618d54d2c5d581"
     }
   }
 }
