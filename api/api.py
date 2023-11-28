@@ -161,9 +161,7 @@ def validate_access(user: Optional[str], control_list: List) -> None:
     Validate the access of a user.
     If the user is not in the control list, an HTTPException is raised.
     """
-    if user is None:
-        return
-    if user.user not in control_list:
+    if user is None or user.user not in control_list:
         raise HTTPException(
             status_code=401, detail="You are not authorized to access this endpoint"
         )
