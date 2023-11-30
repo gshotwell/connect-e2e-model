@@ -14,10 +14,10 @@ This lets you distribute an API to a large group of people, while ensuring that 
 
 There are a couple of things that you should be aware of when using this pattern:
 
-1) This authroization pattern is meant to protect against accidental interaction with the wrong endpoint, not malicious attack. You should use this pattern in addition to Connect's security features to ensure that the top level API domain can only be accessed by the right users. 
+1) This authorization pattern is meant to protect against accidental interaction with the wrong endpoint, not malicious attack. You should use this pattern in addition to Connect's security features to ensure that the top level API domain can only be accessed by the right users. 
 
 2) For simplicity the API stores data and models in the content bundle, but you probably want to use external storage locations like S3 or a database table. 
-Using extenral storage will mean that your data and files will persist regardless of the API deployment, and is cheaper and more robust than storing data on Connect.
+Using external storage will mean that your data and files will persist regardless of the API deployment, and is cheaper and more robust than storing data on Connect.
 
 ## The Python package
 
